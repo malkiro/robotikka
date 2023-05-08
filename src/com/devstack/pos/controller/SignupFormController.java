@@ -1,5 +1,6 @@
 package com.devstack.pos.controller;
 
+import com.devstack.pos.util.PasswordManager;
 import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 import javafx.event.ActionEvent;
@@ -28,10 +29,11 @@ public class SignupFormController {
             String sql="INSERT INTO user VALUES (?,?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, txtEmail.getText());
-            preparedStatement.setString(2, textPassword.getText());
+            preparedStatement.setString(2, PasswordManager.encryptPassword(textPassword.getText()));
 
             if (preparedStatement.executeUpdate()>0){
                 new Alert(Alert.AlertType.CONFIRMATION, "User Saved!").show();
+                clearFields();
             }else{
                 new Alert(Alert.AlertType.WARNING, "Try Again!").show();
             }
@@ -47,7 +49,12 @@ public class SignupFormController {
         setUi("LoginForm");
     }
 
-    private void setUi(String url) throws IOException {
+    private void clearFields() {
+        txtEmail.clear();
+        textPassword.clear();
+    }
+
+        private void setUi(String url) throws IOException {
         Stage stage = (Stage)context.getScene().getWindow();
         stage.setScene(
                 new Scene(FXMLLoader.load(getClass().getResource("../view/"+url+".fxml")))
