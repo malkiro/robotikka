@@ -1,7 +1,7 @@
 package com.devstack.pos.dao;
 
 public class CustomerDto {
-    private String email,
+    private String email;
     private String name;
     private String contact;
     private double salary;

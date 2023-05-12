@@ -137,7 +137,7 @@ public class DatabaseAccessCode {
                     resultSet.getDouble(4)
             ));
         }
-        return null;
+        return dtos;
     }
     //==========Customer management================
 }
