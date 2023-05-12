@@ -4,7 +4,7 @@ import com.devstack.pos.dao.DatabaseAccessCode;
 import com.devstack.pos.util.PasswordManager;
 import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
-import dto.UserDto;
+import com.devstack.pos.dto.UserDto;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

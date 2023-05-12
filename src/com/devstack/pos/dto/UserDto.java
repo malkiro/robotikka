@@ -1,4 +1,4 @@
-package dto;
+package com.devstack.pos.dto;
 
 public class UserDto {
     private String email;
