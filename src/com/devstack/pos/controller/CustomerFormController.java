@@ -47,7 +47,26 @@ public class CustomerFormController {
         colOperate.setCellValueFactory(new PropertyValueFactory<>("deleteButton"));
 
         loadAllCustomers(searchText);
+
+        tbl.getSelectionModel()
+                .selectedItemProperty()
+                .addListener((observable, oldValue, newValue) -> {
+            if (newValue!=null){
+                setData(newValue);
+            }
+        });
     }
+
+    private void setData(CustomerTm newValue) {
+        txtEmail.setEditable(false);
+        btnSaveUpdate.setText("Update Customer");
+        txtEmail.setText(newValue.getEmail());
+        txtName.setText(newValue.getName());
+        txtContact.setText(newValue.getContact());
+        txtSalary.setText(String.valueOf(newValue.getSalary())); // txtSalary.setText(""+newValue.getSalary()); --> Don't use in industry
+
+    }
+
 
     private void loadAllCustomers(String searchText) throws SQLException, ClassNotFoundException {
         ObservableList<CustomerTm> observableList = FXCollections.observableArrayList();
@@ -67,10 +86,6 @@ public class CustomerFormController {
         setUi("DashboardForm");
     }
 
-    public void btnNewCustomerOnAction(ActionEvent actionEvent) {
-
-    }
-
     private void clearFields() {
         txtEmail.clear();
         txtName.clear();
@@ -80,18 +95,40 @@ public class CustomerFormController {
 
     public void btnSaveUpdateOnAction(ActionEvent actionEvent) {
         try {
-            if(DatabaseAccessCode.createCustomer(txtEmail.getText(), txtName.getText(), txtContact.getText(), Double.parseDouble(txtSalary.getText())))
-            {
-                new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
-                clearFields();
-                loadAllCustomers(searchText);
-            }else{
-                new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+            if (btnSaveUpdate.getText().equals("Save Customer")){
+                //Save Customer
+                if(DatabaseAccessCode.createCustomer(txtEmail.getText(), txtName.getText(), txtContact.getText(), Double.parseDouble(txtSalary.getText())))
+                {
+                    new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
+                    clearFields();
+                    loadAllCustomers(searchText);
+                }else{
+                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+                }
+            } else {
+                //Update Customer
+                if(DatabaseAccessCode.updateCustomer(txtEmail.getText(), txtName.getText(), txtContact.getText(), Double.parseDouble(txtSalary.getText())))
+                {
+                    new Alert(Alert.AlertType.CONFIRMATION, "Customer Updated!").show();
+                    clearFields();
+                    loadAllCustomers(searchText);
+                    //----------
+                    txtEmail.setEditable(true);
+                    btnSaveUpdate.setText("Save Customer");
+                }else{
+                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+                }
             }
         }  catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
             new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
         }
+    }
+
+    public void btnNewCustomerOnAction(ActionEvent actionEvent) {
+        txtEmail.setEditable(true);
+        btnSaveUpdate.setText("Save Customer");
+        clearFields();
     }
 
     private void setUi(String url) throws IOException {

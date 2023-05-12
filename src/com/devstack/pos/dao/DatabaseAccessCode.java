@@ -114,7 +114,7 @@ public class DatabaseAccessCode {
                     resultSet.getDouble(4)
             ));
         }
-        return null;
+        return dtos;
     }
 
     public static List<CustomerDto> searchCustomers(String searchText) throws ClassNotFoundException, SQLException {
