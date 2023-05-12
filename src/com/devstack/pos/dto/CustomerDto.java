@@ -1,4 +1,4 @@
-package com.devstack.pos.dao;
+package com.devstack.pos.dto;
 
 public class CustomerDto {
     private String email;

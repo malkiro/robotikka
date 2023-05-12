@@ -1,6 +1,6 @@
 package com.devstack.pos.controller;
 
-import com.devstack.pos.dao.CustomerDto;
+import com.devstack.pos.dto.CustomerDto;
 import com.devstack.pos.dao.DatabaseAccessCode;
 import com.devstack.pos.view.tm.CustomerTm;
 import com.jfoenix.controls.JFXButton;
@@ -17,7 +17,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Observable;
 import java.util.Optional;
 
 public class CustomerFormController {
