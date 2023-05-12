@@ -1,5 +1,6 @@
 package com.devstack.pos.controller;
 
+import com.devstack.pos.dao.DatabaseAccessCode;
 import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 import javafx.event.ActionEvent;
@@ -19,7 +20,7 @@ public class SignupFormController {
 
     public void btnRegisterNowOnAction(ActionEvent actionEvent) {
         try {
-            if (DatabaseAccessCode.createUser(txtEmail.getText(), textPassword.getText())){
+            if (new DatabaseAccessCode().createUser(txtEmail.getText(), textPassword.getText())){
                 new Alert(Alert.AlertType.CONFIRMATION, "User Saved!").show();
                 clearFields();
             }else{
