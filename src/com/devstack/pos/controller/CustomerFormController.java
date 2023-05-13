@@ -1,6 +1,6 @@
 package com.devstack.pos.controller;
 
-import com.devstack.pos.dao.DatabaseAccessCode;
+import com.devstack.pos.bo.custom.impl.CustomerBoImpl;
 import com.devstack.pos.dto.CustomerDto;
 import com.devstack.pos.view.tm.CustomerTm;
 import com.jfoenix.controls.JFXButton;
@@ -36,7 +36,7 @@ public class CustomerFormController {
     public TableColumn colSalary;
     public TableColumn colOperate;
 
-    private String searchText = "";
+    private String searchText="";
 
     public void initialize() throws SQLException, ClassNotFoundException {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -51,11 +51,10 @@ public class CustomerFormController {
         tbl.getSelectionModel()
                 .selectedItemProperty()
                 .addListener((observable, oldValue, newValue) -> {
-            if (newValue!=null){
-                setData(newValue);
-            }
-        });
-
+                    if (newValue!=null){
+                        setData(newValue);
+                    }
+                });
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
             searchText=newValue;
             try {
@@ -64,6 +63,7 @@ public class CustomerFormController {
                 throw new RuntimeException(e);
             }
         });
+
     }
 
     private void setData(CustomerTm newValue) {
@@ -71,32 +71,32 @@ public class CustomerFormController {
         btnSaveUpdate.setText("Update Customer");
         txtEmail.setText(newValue.getEmail());
         txtName.setText(newValue.getName());
+        txtSalary.setText(String.valueOf(newValue.getSalary()));
+        // txtSalary.setText(""+newValue.getSalary());
         txtContact.setText(newValue.getContact());
-        txtSalary.setText(String.valueOf(newValue.getSalary())); // txtSalary.setText(""+newValue.getSalary()); --> Don't use in industry
-
     }
-
 
     private void loadAllCustomers(String searchText) throws SQLException, ClassNotFoundException {
         ObservableList<CustomerTm> observableList = FXCollections.observableArrayList();
         int counter=1;
-//        for (CustomerDto com.devstack.pos.dto : new DatabaseAccessCode().searchCustomers(searchText)) {
-        for (CustomerDto dto :
-                searchText.length()>0?new DatabaseAccessCode().searchCustomers(searchText):new DatabaseAccessCode().findAllCustomers()) {
+        for (CustomerDto dto:
+                searchText.length()>0?new CustomerBoImpl().searchCustomers(searchText):new CustomerBoImpl().findAllCustomers()){
             Button btn = new Button("Delete");
             CustomerTm tm = new CustomerTm(
-                    counter,dto.getEmail(), dto.getName(), dto.getContact(), dto.getSalary(), btn
+                    counter,dto.getEmail(), dto.getName(), dto.getContact(), dto.getSalary(),
+                    btn
             );
             observableList.add(tm);
             counter++;
 
-            //------> (Delete)
             btn.setOnAction((e)->{
                 try{
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"Are you sure?", ButtonType.YES,ButtonType.NO);
+                    Alert alert = new
+                            Alert(Alert.AlertType.CONFIRMATION,
+                            "Are you sure?", ButtonType.YES,ButtonType.NO);
                     Optional<ButtonType> selectedButtonType = alert.showAndWait();
                     if (selectedButtonType.get().equals(ButtonType.YES)){
-                        if (new DatabaseAccessCode().deleteCustomer(dto.getEmail())){
+                        if (new CustomerBoImpl().deleteCustomer(dto.getEmail())){
                             new Alert(Alert.AlertType.CONFIRMATION, "Customer Deleted!").show();
                             loadAllCustomers(searchText);
                         }else{
@@ -112,9 +112,45 @@ public class CustomerFormController {
         }
         tbl.setItems(observableList);
     }
+    public void btnSaveUpdateOnAction(ActionEvent actionEvent) {
+        try{
 
-    public void btnBackToHomeOnAction(ActionEvent actionEvent) throws IOException {
-        setUi("DashboardForm");
+            if (btnSaveUpdate.getText().equals("Save Customer")){
+                if (
+                        new CustomerBoImpl().saveCustomer(
+                                new CustomerDto(txtEmail.getText(),txtName.getText(),
+                                        txtContact.getText(),Double.parseDouble(txtSalary.getText())
+                                ))
+                ){
+                    new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
+                    clearFields();
+                    loadAllCustomers(searchText);
+                }else{
+                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+                }
+            }else{
+                if (
+                        new CustomerBoImpl().updateCustomer(
+                                new CustomerDto(
+                                        txtEmail.getText(),txtName.getText(),
+                                        txtContact.getText(),Double.parseDouble(txtSalary.getText())
+                                ))
+                ){
+                    new Alert(Alert.AlertType.CONFIRMATION, "Customer Updated!").show();
+                    clearFields();
+                    loadAllCustomers(searchText);
+                    //---------
+                    txtEmail.setEditable(true);
+                    btnSaveUpdate.setText("Save Customer");
+                }else{
+                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+                }
+            }
+        }catch (SQLException | ClassNotFoundException e){
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+        }
+
     }
 
     private void clearFields() {
@@ -124,49 +160,22 @@ public class CustomerFormController {
         txtSalary.clear();
     }
 
-    public void btnSaveUpdateOnAction(ActionEvent actionEvent) {
-        try {
-            if (btnSaveUpdate.getText().equals("Save Customer")){
-                //Save Customer
-                if(new DatabaseAccessCode().createCustomer(txtEmail.getText(), txtName.getText(), txtContact.getText(), Double.parseDouble(txtSalary.getText())))
-                {
-                    new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
-                    clearFields();
-                    loadAllCustomers(searchText);
-                }else{
-                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
-                }
-            } else {
-                //Update Customer
-                if(new DatabaseAccessCode().updateCustomer(txtEmail.getText(), txtName.getText(), txtContact.getText(), Double.parseDouble(txtSalary.getText())))
-                {
-                    new Alert(Alert.AlertType.CONFIRMATION, "Customer Updated!").show();
-                    clearFields();
-                    loadAllCustomers(searchText);
-                    //----------
-                    txtEmail.setEditable(true);
-                    btnSaveUpdate.setText("Save Customer");
-                }else{
-                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
-                }
-            }
-        }  catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
-        }
+
+    private void setUi(String url) throws IOException {
+        Stage stage = (Stage) context.getScene().getWindow();
+        stage.centerOnScreen();
+        stage.setScene(
+                new Scene(FXMLLoader.load(getClass().getResource("../view/" + url + ".fxml")))
+        );
+    }
+
+    public void btnBackToHomeOnAction(ActionEvent actionEvent) throws IOException {
+        setUi("DashboardForm");
     }
 
     public void btnNewCustomerOnAction(ActionEvent actionEvent) {
         txtEmail.setEditable(true);
         btnSaveUpdate.setText("Save Customer");
         clearFields();
-    }
-
-    private void setUi(String url) throws IOException {
-        Stage stage = (Stage) context.getScene().getWindow();
-        stage.setScene(
-                new Scene(FXMLLoader.load(getClass().getResource("../view/" + url + ".fxml")))
-        );
-        stage.centerOnScreen();
     }
 }
