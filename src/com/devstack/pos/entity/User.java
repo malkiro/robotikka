@@ -1,6 +1,13 @@
 package com.devstack.pos.entity;
+/*
+ * finalize (Crud)
+ * regex
+ * jasper report
+ * damp file-> Backup
+ * barcode->
+ * */
 
-public class User {
+public class User implements SuperEntity{
     private String email;
     private String password;
 
